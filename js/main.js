@@ -163,7 +163,7 @@ const initializeGame = () => {
     (canvas.height - paddleHeight) / 2
   );
 
-  const ballSpeed = 2;
+  const ballSpeed = 3;
   const ball = createBall(
     15,
     15,
