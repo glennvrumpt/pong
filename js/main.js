@@ -144,7 +144,7 @@ const initializeGame = () => {
   canvas.setAttribute("id", "canvas");
   canvas.width = 1024;
   canvas.height = 768;
-  document.body.appendChild(canvas);
+  document.body.append(canvas);
 
   const paddleWidth = 15;
   const paddleHeight = 100;
