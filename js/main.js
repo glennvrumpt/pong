@@ -21,14 +21,16 @@ const createBall = (width, height, x, y, speed) => ({
   directionY: createRandomDirection(),
 });
 
-let keys = {
-  w: false,
-  s: false,
-  i: false,
-  k: false,
+const initializeKeys = () => {
+  return {
+    w: false,
+    s: false,
+    i: false,
+    k: false,
+  };
 };
 
-const handleInput = (event) => {
+const handleInput = (event, keys) => {
   switch (event.key) {
     case "w":
       keys.w = event.type === "keydown";
@@ -45,7 +47,7 @@ const handleInput = (event) => {
   }
 };
 
-const handleInputUpdate = (paddleOne, paddleTwo) => {
+const handleInputUpdate = (paddleOne, paddleTwo, keys) => {
   if (keys.w) {
     paddleOne.velocity = -5;
   } else if (keys.s) {
@@ -100,14 +102,14 @@ const updateBall = (ball, canvas, paddleOne, paddleTwo) => {
 };
 
 const clearScreen = (ctx) => {
-  ctx.fillStyle = "black";
+  ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 };
 
 const render = (canvas, paddleOne, paddleTwo, ball) => {
   const ctx = canvas.getContext("2d");
   clearScreen(ctx);
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "#FFFFFF";
 
   ctx.fillRect(paddleOne.x, paddleOne.y, paddleOne.width, paddleOne.height);
   ctx.fillRect(paddleTwo.x, paddleTwo.y, paddleTwo.width, paddleTwo.height);
@@ -124,27 +126,18 @@ const render = (canvas, paddleOne, paddleTwo, ball) => {
   ctx.closePath();
 };
 
-const gameLoop = (canvas, paddleOne, paddleTwo, ball) => {
-  const loop = () => {
-    handleInputUpdate(paddleOne, paddleTwo);
+const gameLoop = (canvas, paddleOne, paddleTwo, ball, keys) => {
+  handleInputUpdate(paddleOne, paddleTwo, keys);
 
-    updatePaddlePosition(paddleOne, canvas.height);
-    updatePaddlePosition(paddleTwo, canvas.height);
+  updatePaddlePosition(paddleOne, canvas.height);
+  updatePaddlePosition(paddleTwo, canvas.height);
 
-    updateBall(ball, canvas, paddleOne, paddleTwo);
-    render(canvas, paddleOne, paddleTwo, ball);
+  updateBall(ball, canvas, paddleOne, paddleTwo);
+  render(canvas, paddleOne, paddleTwo, ball);
 
-    requestAnimationFrame(loop);
-  };
-
-  document.addEventListener("keydown", (event) =>
-    handleInput(event, paddleOne, paddleTwo)
+  requestAnimationFrame(() =>
+    gameLoop(canvas, paddleOne, paddleTwo, ball, keys)
   );
-  document.addEventListener("keyup", (event) =>
-    handleInput(event, paddleOne, paddleTwo)
-  );
-
-  loop();
 };
 
 const initializeGame = () => {
@@ -180,7 +173,12 @@ const initializeGame = () => {
     ballSpeed
   );
 
-  gameLoop(canvas, paddleOne, paddleTwo, ball);
+  const keys = initializeKeys();
+
+  document.addEventListener("keydown", (event) => handleInput(event, keys));
+  document.addEventListener("keyup", (event) => handleInput(event, keys));
+
+  gameLoop(canvas, paddleOne, paddleTwo, ball, keys);
 };
 
 initializeGame();
