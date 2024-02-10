@@ -45,6 +45,24 @@ const handleInput = (event) => {
   }
 };
 
+const handleInputUpdate = (paddleOne, paddleTwo) => {
+  if (keys.w) {
+    paddleOne.velocity = -5;
+  } else if (keys.s) {
+    paddleOne.velocity = 5;
+  } else {
+    paddleOne.velocity = 0;
+  }
+
+  if (keys.i) {
+    paddleTwo.velocity = -5;
+  } else if (keys.k) {
+    paddleTwo.velocity = 5;
+  } else {
+    paddleTwo.velocity = 0;
+  }
+};
+
 const updatePaddlePosition = (paddle, canvasHeight) => {
   paddle.y = Math.min(
     Math.max(paddle.y + paddle.velocity, 0),
@@ -81,10 +99,14 @@ const updateBall = (ball, canvas, paddleOne, paddleTwo) => {
   }
 };
 
-const render = (canvas, paddleOne, paddleTwo, ball) => {
-  const ctx = canvas.getContext("2d");
+const clearScreen = (ctx) => {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+};
+
+const render = (canvas, paddleOne, paddleTwo, ball) => {
+  const ctx = canvas.getContext("2d");
+  clearScreen(ctx);
   ctx.fillStyle = "white";
 
   ctx.fillRect(paddleOne.x, paddleOne.y, paddleOne.width, paddleOne.height);
@@ -104,21 +126,7 @@ const render = (canvas, paddleOne, paddleTwo, ball) => {
 
 const gameLoop = (canvas, paddleOne, paddleTwo, ball) => {
   const loop = () => {
-    if (keys.w) {
-      paddleOne.velocity = -5;
-    } else if (keys.s) {
-      paddleOne.velocity = 5;
-    } else {
-      paddleOne.velocity = 0;
-    }
-
-    if (keys.i) {
-      paddleTwo.velocity = -5;
-    } else if (keys.k) {
-      paddleTwo.velocity = 5;
-    } else {
-      paddleTwo.velocity = 0;
-    }
+    handleInputUpdate(paddleOne, paddleTwo);
 
     updatePaddlePosition(paddleOne, canvas.height);
     updatePaddlePosition(paddleTwo, canvas.height);
