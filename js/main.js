@@ -83,22 +83,9 @@ const updateBall = (ball, canvas, paddleOne, paddleTwo, score, deltaTime) => {
   ball.x += ball.speed * ball.directionX * deltaTime;
   ball.y += ball.speed * ball.directionY * deltaTime;
 
-  if (ball.y <= 0 || ball.y + ball.height >= canvas.height) {
-    ball.directionY *= -1;
-  }
-
-  if (
-    (ball.x <= paddleOne.x + paddleOne.width &&
-      ball.x + ball.width >= paddleOne.x &&
-      ball.y + ball.height >= paddleOne.y &&
-      ball.y <= paddleOne.y + paddleOne.height) ||
-    (ball.x + ball.width >= paddleTwo.x &&
-      ball.x <= paddleTwo.x + paddleTwo.width &&
-      ball.y + ball.height >= paddleTwo.y &&
-      ball.y <= paddleTwo.y + paddleTwo.height)
-  ) {
-    ball.directionX *= -1;
-  }
+  handleWallCollision(ball);
+  handlePaddleCollision(ball, paddleOne);
+  handlePaddleCollision(ball, paddleTwo);
 
   if (ball.x <= 0) {
     score.playerTwo += 1;
@@ -106,6 +93,26 @@ const updateBall = (ball, canvas, paddleOne, paddleTwo, score, deltaTime) => {
   } else if (ball.x + ball.width >= canvas.width) {
     score.playerOne += 1;
     resetBallPosition(ball, canvas);
+  }
+};
+
+const handleWallCollision = (ball) => {
+  if (ball.y <= 0 || ball.y + ball.height >= canvas.height) {
+    ball.directionY *= -1;
+    ball.y = Math.max(0, Math.min(canvas.height - ball.height, ball.y));
+  }
+};
+
+const handlePaddleCollision = (ball, paddle) => {
+  if (
+    ball.x < paddle.x + paddle.width &&
+    ball.x + ball.width > paddle.x &&
+    ball.y < paddle.y + paddle.height &&
+    ball.y + ball.height > paddle.y
+  ) {
+    if (ball.directionX > 0 ? ball.x < paddle.x : ball.x > paddle.x) {
+      ball.directionX *= -1;
+    }
   }
 };
 
