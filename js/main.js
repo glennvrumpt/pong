@@ -49,25 +49,25 @@ const handleInput = (event, keys) => {
 
 const handleInputUpdate = (paddleOne, paddleTwo, keys) => {
   if (keys.w) {
-    paddleOne.velocity = -5;
+    paddleOne.velocity = -800;
   } else if (keys.s) {
-    paddleOne.velocity = 5;
+    paddleOne.velocity = 800;
   } else {
     paddleOne.velocity = 0;
   }
 
   if (keys.i) {
-    paddleTwo.velocity = -5;
+    paddleTwo.velocity = -800;
   } else if (keys.k) {
-    paddleTwo.velocity = 5;
+    paddleTwo.velocity = 800;
   } else {
     paddleTwo.velocity = 0;
   }
 };
 
-const updatePaddlePosition = (paddle, canvasHeight) => {
+const updatePaddlePosition = (paddle, canvasHeight, deltaTime) => {
   paddle.y = Math.min(
-    Math.max(paddle.y + paddle.velocity, 0),
+    Math.max(paddle.y + paddle.velocity * deltaTime, 0),
     canvasHeight - paddle.height
   );
 };
@@ -79,9 +79,9 @@ const resetBallPosition = (ball, canvas) => {
   ball.directionY = createRandomDirection();
 };
 
-const updateBall = (ball, canvas, paddleOne, paddleTwo, score) => {
-  ball.x += ball.speed * ball.directionX;
-  ball.y += ball.speed * ball.directionY;
+const updateBall = (ball, canvas, paddleOne, paddleTwo, score, deltaTime) => {
+  ball.x += ball.speed * ball.directionX * deltaTime;
+  ball.y += ball.speed * ball.directionY * deltaTime;
 
   if (ball.y <= 0 || ball.y + ball.height >= canvas.height) {
     ball.directionY *= -1;
@@ -141,17 +141,28 @@ const render = (canvas, paddleOne, paddleTwo, ball, score) => {
   ctx.closePath();
 };
 
-const mainLoop = (canvas, paddleOne, paddleTwo, ball, keys, score) => {
+const mainLoop = (
+  canvas,
+  paddleOne,
+  paddleTwo,
+  ball,
+  keys,
+  score,
+  lastTimestamp
+) => {
+  const currentTimestamp = performance.now();
+  const deltaTime = (currentTimestamp - lastTimestamp) / 1000;
+
   handleInputUpdate(paddleOne, paddleTwo, keys);
 
-  updatePaddlePosition(paddleOne, canvas.height);
-  updatePaddlePosition(paddleTwo, canvas.height);
+  updatePaddlePosition(paddleOne, canvas.height, deltaTime);
+  updatePaddlePosition(paddleTwo, canvas.height, deltaTime);
+  updateBall(ball, canvas, paddleOne, paddleTwo, score, deltaTime);
 
-  updateBall(ball, canvas, paddleOne, paddleTwo, score);
   render(canvas, paddleOne, paddleTwo, ball, score);
 
   requestAnimationFrame(() =>
-    mainLoop(canvas, paddleOne, paddleTwo, ball, keys, score)
+    mainLoop(canvas, paddleOne, paddleTwo, ball, keys, score, currentTimestamp)
   );
 };
 
@@ -184,7 +195,7 @@ const initialize = () => {
     15,
     (canvas.width - 15) / 2,
     (canvas.height - 15) / 2,
-    4
+    600
   );
 
   const score = { playerOne: 0, playerTwo: 0 };
@@ -194,7 +205,7 @@ const initialize = () => {
   document.addEventListener("keydown", (event) => handleInput(event, keys));
   document.addEventListener("keyup", (event) => handleInput(event, keys));
 
-  mainLoop(canvas, paddleOne, paddleTwo, ball, keys, score);
+  mainLoop(canvas, paddleOne, paddleTwo, ball, keys, score, performance.now());
 };
 
 initialize();
