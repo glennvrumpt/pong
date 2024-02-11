@@ -72,7 +72,14 @@ const updatePaddlePosition = (paddle, canvasHeight) => {
   );
 };
 
-const updateBall = (ball, canvas, paddleOne, paddleTwo) => {
+const resetBallPosition = (ball, canvas) => {
+  ball.x = (canvas.width - ball.width) / 2;
+  ball.y = (canvas.height - ball.height) / 2;
+  ball.directionX = createRandomDirection();
+  ball.directionY = createRandomDirection();
+};
+
+const updateBall = (ball, canvas, paddleOne, paddleTwo, score) => {
   ball.x += ball.speed * ball.directionX;
   ball.y += ball.speed * ball.directionY;
 
@@ -93,11 +100,12 @@ const updateBall = (ball, canvas, paddleOne, paddleTwo) => {
     ball.directionX *= -1;
   }
 
-  if (ball.x <= 0 || ball.x + ball.width >= canvas.width) {
-    ball.x = (canvas.width - ball.width) / 2;
-    ball.y = (canvas.height - ball.height) / 2;
-    ball.directionX = createRandomDirection();
-    ball.directionY = createRandomDirection();
+  if (ball.x <= 0) {
+    score.playerTwo += 1;
+    resetBallPosition(ball, canvas);
+  } else if (ball.x + ball.width >= canvas.width) {
+    score.playerOne += 1;
+    resetBallPosition(ball, canvas);
   }
 };
 
@@ -106,13 +114,20 @@ const clearScreen = (ctx) => {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 };
 
-const render = (canvas, paddleOne, paddleTwo, ball) => {
+const render = (canvas, paddleOne, paddleTwo, ball, score) => {
   const ctx = canvas.getContext("2d");
   clearScreen(ctx);
   ctx.fillStyle = "#FFFFFF";
 
   ctx.fillRect(paddleOne.x, paddleOne.y, paddleOne.width, paddleOne.height);
   ctx.fillRect(paddleTwo.x, paddleTwo.y, paddleTwo.width, paddleTwo.height);
+
+  ctx.font = "1.875rem Arial";
+  const middleX = canvas.width / 2;
+  const yOffset = 50;
+
+  ctx.fillText(score.playerOne, middleX - 50, yOffset);
+  ctx.fillText(score.playerTwo, middleX + 50, yOffset);
 
   ctx.beginPath();
   ctx.arc(
@@ -126,21 +141,21 @@ const render = (canvas, paddleOne, paddleTwo, ball) => {
   ctx.closePath();
 };
 
-const gameLoop = (canvas, paddleOne, paddleTwo, ball, keys) => {
+const mainLoop = (canvas, paddleOne, paddleTwo, ball, keys, score) => {
   handleInputUpdate(paddleOne, paddleTwo, keys);
 
   updatePaddlePosition(paddleOne, canvas.height);
   updatePaddlePosition(paddleTwo, canvas.height);
 
-  updateBall(ball, canvas, paddleOne, paddleTwo);
-  render(canvas, paddleOne, paddleTwo, ball);
+  updateBall(ball, canvas, paddleOne, paddleTwo, score);
+  render(canvas, paddleOne, paddleTwo, ball, score);
 
   requestAnimationFrame(() =>
-    gameLoop(canvas, paddleOne, paddleTwo, ball, keys)
+    mainLoop(canvas, paddleOne, paddleTwo, ball, keys, score)
   );
 };
 
-const initializeGame = () => {
+const initialize = () => {
   const canvas = document.createElement("canvas");
   canvas.setAttribute("id", "canvas");
   canvas.width = 1024;
@@ -164,21 +179,22 @@ const initializeGame = () => {
     (canvas.height - paddleHeight) / 2
   );
 
-  const ballSpeed = 4;
   const ball = createBall(
     15,
     15,
     (canvas.width - 15) / 2,
     (canvas.height - 15) / 2,
-    ballSpeed
+    4
   );
+
+  const score = { playerOne: 0, playerTwo: 0 };
 
   const keys = initializeKeys();
 
   document.addEventListener("keydown", (event) => handleInput(event, keys));
   document.addEventListener("keyup", (event) => handleInput(event, keys));
 
-  gameLoop(canvas, paddleOne, paddleTwo, ball, keys);
+  mainLoop(canvas, paddleOne, paddleTwo, ball, keys, score);
 };
 
-initializeGame();
+initialize();
