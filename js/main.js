@@ -116,14 +116,14 @@ const handlePaddleCollision = (ball, paddle) => {
   }
 };
 
-const clearScreen = (ctx) => {
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+const clearCanvas = (ctx) => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
 
 const render = (canvas, paddleOne, paddleTwo, ball, score) => {
   const ctx = canvas.getContext("2d");
-  clearScreen(ctx);
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#FFFFFF";
 
   ctx.fillRect(paddleOne.x, paddleOne.y, paddleOne.width, paddleOne.height);
